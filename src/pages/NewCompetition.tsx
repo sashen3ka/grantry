@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 
 interface GrantCompetition {
   id: number
@@ -12,9 +11,11 @@ interface GrantCompetition {
   amount: string
 }
 
-export default function NewCompetition() {
-  const navigate = useNavigate()
-
+export default function NewCompetition({
+  onCreated,
+}: {
+  onCreated?: (list: GrantCompetition[]) => void
+}) {
   const [form, setForm] = useState<GrantCompetition>({
     id: Date.now(),
     title: '',
@@ -26,20 +27,37 @@ export default function NewCompetition() {
     amount: '',
   })
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+
     const existing = JSON.parse(localStorage.getItem('competitions') || '[]')
-    localStorage.setItem('competitions', JSON.stringify([...existing, form]))
-    navigate('/dashboard')
+    const updated = [...existing, form]
+
+    localStorage.setItem('competitions', JSON.stringify(updated))
+    onCreated?.(updated)
+
+    // Очистить форму
+    setForm({
+      id: Date.now(),
+      title: '',
+      dates: '',
+      format: '',
+      region: '',
+      description: '',
+      methodology: '',
+      amount: '',
+    })
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6 mt-12 border rounded shadow">
-      <h1 className="text-2xl font-bold mb-6">Создать грантовый конкурс</h1>
+    <div className="max-w-2xl p-6 border rounded shadow bg-white">
+      <h2 className="text-xl font-bold mb-4">Создать грантовый конкурс</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="text"
