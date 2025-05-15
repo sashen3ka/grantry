@@ -15,9 +15,7 @@ export default function Header() {
                     <Link to="/compare" className="hover:text-blue-600 transition-colors duration-200">
                         Сравнение конкурсов
                     </Link>
-                    <Link to="/materials" className="hover:text-blue-600 transition-colors duration-200">
-                        Полезные материалы
-                    </Link>
+                    <Link to="/resources">Полезные материалы</Link>
                     <Link to="/news" className="hover:text-blue-600 transition-colors duration-200">
                         Новости
                     </Link>
