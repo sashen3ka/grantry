@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import DashboardAdmin from './DashboardAdmin'
+import DashboardGrantor from './DashboardGrantor.tsx'
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -16,23 +18,7 @@ export default function Dashboard() {
     setRole(parsed.role)
   }, [])
 
-  if (!role) {
-    return <div className="p-6">Загрузка...</div>
-  }
+  if (!role) return <div className="p-6">Загрузка...</div>
 
-  if (role === 'admin') {
-    return (
-      <div className="p-6">
-        <h1 className="text-2xl font-bold">Кабинет администратора</h1>
-        <p className="mt-2">Здесь будет список заявок от грантодателей.</p>
-      </div>
-    )
-  }
-
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">Кабинет грантодателя</h1>
-      <p className="mt-2">Здесь будут ваши заявки и кнопка “создать грант”.</p>
-    </div>
-  )
+  return role === 'admin' ? <DashboardAdmin /> : <DashboardGrantor />
 }
