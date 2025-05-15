@@ -5,9 +5,6 @@ import Layout from './layouts/MainLayout.tsx'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
-import NewGrant from './pages/NewGrant'
-import EditGrant from './pages/EditGrant'
-import NewCompetition from './pages/NewCompetition'
 import Catalog from './pages/Catalog'
 import Competitions from './pages/Competitions'
 import Compare from './pages/Compare'
@@ -27,9 +24,6 @@ function App() {
           <Route path="/resources" element={<Resources />} />
           <Route path="/news" element={<News />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/new-grant" element={<NewGrant />} />
-          <Route path="/edit-grant/:id" element={<EditGrant />} />
-          <Route path="/new-competition" element={<NewCompetition />} />
         </Route>
 
         {/* Отдельная страница логина без хедера */}
