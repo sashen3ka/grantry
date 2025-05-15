@@ -14,7 +14,7 @@ const GrantorProfile = () => {
   if (!grantor) return <div className="p-6">Грантодатель не найден</div>;
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="max-w-7xl mx-auto px-4 py-6">
       <h1 className="text-3xl font-bold mb-4">{grantor.name}</h1>
 
       <div className="mb-4">

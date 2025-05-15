@@ -29,7 +29,7 @@ export default function Catalog() {
     );
 
     return (
-        <div className="max-w-5xl mx-auto px-6 py-6">
+        <div className="max-w-7xl mx-auto px-4 py-6">
             <h1 className="text-2xl font-bold mb-4">Каталог грантодателей</h1>
 
             <div className="mb-6">
