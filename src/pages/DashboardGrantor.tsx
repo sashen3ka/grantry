@@ -9,33 +9,25 @@ interface Grant {
     createdAt: string
 }
 
-// Функция для нормализации статуса
-function normalizeGrantStatus(
-    status: string
-): 'draft' | 'submitted' | 'approved' | 'rejected' {
-    switch (status) {
-        case 'draft':
-        case 'submitted':
-        case 'approved':
-        case 'rejected':
-            return status
-        default:
-            return 'draft' // если статус неизвестен, считаем черновиком
-    }
-}
-
 export default function DashboardGrantor() {
     const [grants, setGrants] = useState<Grant[]>([])
     const navigate = useNavigate()
 
     useEffect(() => {
-        const storedRaw = JSON.parse(localStorage.getItem('grants') || '[]')
-        const stored: Grant[] = storedRaw.map((g: any) => ({
+        const stored = JSON.parse(localStorage.getItem('grants') || '[]')
+        const parsed: Grant[] = stored.map((g: any) => ({
             ...g,
-            status: normalizeGrantStatus(g.status),
+            status: normalizeStatus(g.status),
         }))
-        setGrants(stored)
+        setGrants(parsed)
     }, [])
+
+    const normalizeStatus = (status: string): Grant['status'] => {
+        if (['draft', 'submitted', 'approved', 'rejected'].includes(status)) {
+            return status as Grant['status']
+        }
+        return 'draft'
+    }
 
     const handleDelete = (id: number) => {
         if (!window.confirm('Вы уверены, что хотите удалить заявку?')) return
@@ -45,17 +37,23 @@ export default function DashboardGrantor() {
     }
 
     const handleSubmit = (id: number) => {
-        const newStatus: Grant['status'] = 'submitted'
+        const grant = grants.find((g) => g.id === id)
+
+        if (!grant) return alert('Заявка не найдена.')
+
+        // Блок-схема: выбран ли "сохранить" → у нас данные уже сохранены в черновике
+        // Проверка: заполнены ли поля
+        if (!grant.title.trim() || !grant.description.trim()) {
+            return alert('Пожалуйста, заполните все поля перед отправкой на модерацию.')
+        }
 
         const updated = grants.map((g) =>
-            g.id === id
-                ? { ...g, status: newStatus }
-                : g
+            g.id === id ? { ...g, status: 'submitted' as Grant['status'] } : g
         )
 
         localStorage.setItem('grants', JSON.stringify(updated))
         setGrants(updated)
-        alert('Заявка отправлена на модерацию')
+        alert('Заявка успешно отправлена на модерацию.')
     }
 
     const handleLogout = () => {
@@ -74,12 +72,6 @@ export default function DashboardGrantor() {
         <div className="p-6 max-w-4xl mx-auto space-y-6">
             <header className="flex justify-between items-center">
                 <h1 className="text-2xl font-bold">Кабинет грантодателя</h1>
-                <button
-                    onClick={handleLogout}
-                    className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-                >
-                    Выйти
-                </button>
             </header>
 
             <Link
