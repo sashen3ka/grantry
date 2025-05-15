@@ -4,6 +4,7 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import NewGrant from './pages/NewGrant' // ✅ импортируй страницу
+import DashboardAdmin from './pages/DashboardAdmin'
 
 function App() {
   return (
