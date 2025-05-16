@@ -14,6 +14,8 @@ import Compare from './pages/Compare';
 import Resources from './pages/Resources';
 import News from './pages/News';
 import GrantorProfile from './pages/GrantorProfile';
+import CompetitionProfile from './pages/CompetitionProfile';
+
 
 // Admin pages
 import Dashboard from './pages/Dashboard';
@@ -34,6 +36,8 @@ function App() {
           <Route path="/news" element={<News />} />
           <Route path="/grantors/:id" element={<GrantorProfile />} />
           <Route path="/grantors" element={<GrantorsList />} />
+          <Route path="/competitions/:id" element={<CompetitionProfile />} />
+
 
         </Route>
 

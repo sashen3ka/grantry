@@ -18,7 +18,7 @@ export default function Header() {
             </li>
             <li>
               <Link to="/compare" className="hover:text-blue-600 transition">
-                Сравнение конкурсов
+                Конкурсы
               </Link>
             </li>
             <li>

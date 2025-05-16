@@ -1,4 +1,4 @@
-// ✅ CompetitionsTab.tsx с модалкой и валидацией полей
+// ✅ CompetitionsTab.tsx с типами для конкурсов
 import React, { useEffect, useState } from 'react';
 
 interface Competition {
@@ -11,6 +11,7 @@ interface Competition {
   methodology: string;
   amount: string;
   grantorId: number;
+  types: string[];
 }
 
 interface Grantor {
@@ -27,6 +28,8 @@ export default function CompetitionsTab() {
   const [search, setSearch] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const allTypes = ['Физические лица', 'Юридические лица', 'НКО', 'ИП', 'Субсидии'];
+
   const emptyForm: Competition = {
     id: Date.now(),
     title: '',
@@ -37,6 +40,7 @@ export default function CompetitionsTab() {
     methodology: '',
     amount: '',
     grantorId: 0,
+    types: [],
   };
 
   const [form, setForm] = useState<Competition>(emptyForm);
@@ -60,6 +64,7 @@ export default function CompetitionsTab() {
       newErrors.amount = 'Введите корректную сумму';
     }
     if (form.grantorId === 0) newErrors.grantorId = 'Выберите грантодателя';
+    if (form.types.length === 0) newErrors.types = 'Укажите хотя бы один тип';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -101,16 +106,16 @@ export default function CompetitionsTab() {
   };
 
   const placeholders: Record<string, string> = {
-  title: 'Напишите название конкурса',
-  dates: 'Выберите дату проведения конкурса',
-  format: 'Например: онлайн, офлайн, гибридный',
-  region: 'Укажите регион проведения',
-  description: 'Краткое описание целей и условий конкурса',
-  methodology: 'Опишите методические рекомендации, если есть',
-  amount: 'Введите сумму финансирования, например: 100000'
-};
+    title: 'Напишите название конкурса',
+    dates: 'Выберите дату проведения конкурса',
+    format: 'Например: онлайн, офлайн, гибридный',
+    region: 'Укажите регион проведения',
+    description: 'Краткое описание целей и условий конкурса',
+    methodology: 'Опишите методические рекомендации, если есть',
+    amount: 'Введите сумму финансирования, например: 100000'
+  };
 
-const filtered = competitions.filter((c) =>
+  const filtered = competitions.filter((c) =>
     c.title.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -167,6 +172,7 @@ const filtered = competitions.filter((c) =>
                   <p><strong>Формат:</strong> {c.format}</p>
                   <p><strong>Регион:</strong> {c.region}</p>
                   <p><strong>Сумма:</strong> {c.amount}</p>
+                  <p><strong>Типы:</strong> {c.types.join(', ')}</p>
                   <p><strong>Описание:</strong> {c.description}</p>
                   <p><strong>Методология:</strong> {c.methodology}</p>
                 </div>
@@ -207,6 +213,31 @@ const filtered = competitions.filter((c) =>
                   {errors[field] && <p className="text-sm text-red-600 mt-1">{errors[field]}</p>}
                 </div>
               ))}
+
+              <div>
+                <p className="text-sm font-medium mb-1">Типы:</p>
+                <div className="flex flex-wrap gap-4">
+                  {allTypes.map((t) => (
+                    <label key={t} className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={form.types.includes(t)}
+                        onChange={() => {
+                          setForm((prev) => ({
+                            ...prev,
+                            types: prev.types.includes(t)
+                              ? prev.types.filter((x) => x !== t)
+                              : [...prev.types, t],
+                          }));
+                        }}
+                      />
+                      {t}
+                    </label>
+                  ))}
+                </div>
+                {errors.types && <p className="text-sm text-red-600 mt-1">{errors.types}</p>}
+              </div>
+
               <div>
                 <select
                   name="grantorId"

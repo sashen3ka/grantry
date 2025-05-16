@@ -1,112 +1,154 @@
-import React, { useEffect, useState } from 'react'
+// ✅ Compare.tsx → "Конкурсы" с фильтрацией и ссылкой на страницу конкурса
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 interface Competition {
-  id: number
-  title: string
-  dates: string
-  format: string
-  region: string
-  description: string
-  methodology: string
-  amount: string
-  grantorId: number
-}
-
-interface Grantor {
-  id: number
-  name: string
+  id: number;
+  title: string;
+  dates: string;
+  format: string;
+  region: string;
+  description: string;
+  methodology: string;
+  amount: string;
+  grantorId: number;
 }
 
 export default function Compare() {
-  const [competitions, setCompetitions] = useState<Competition[]>([])
-  const [grantors, setGrantors] = useState<Grantor[]>([])
-  const [selectedIds, setSelectedIds] = useState<number[]>([])
+  const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const [search, setSearch] = useState('');
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    format: [] as string[],
+    region: '',
+    amountMin: '',
+    amountMax: '',
+  });
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem('competitions') || '[]')
-    const g = JSON.parse(localStorage.getItem('grantors') || '[]')
-    setCompetitions(stored)
-    setGrantors(g)
-  }, [])
+    const stored = JSON.parse(localStorage.getItem('competitions') || '[]');
+    setCompetitions(stored);
+  }, []);
 
-  const toggleSelect = (id: number) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    )
-  }
+  const allFormats = ['онлайн', 'офлайн', 'гибридный'];
 
-  const selected = competitions.filter((c) => selectedIds.includes(c.id))
+  const toggleFormat = (f: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      format: prev.format.includes(f)
+        ? prev.format.filter((x) => x !== f)
+        : [...prev.format, f],
+    }));
+  };
 
-  const getGrantorName = (id: number) =>
-    grantors.find((g) => g.id === id)?.name || '—'
+  const filtered = competitions.filter((c) => {
+    const matchesSearch = c.title.toLowerCase().includes(search.toLowerCase());
+    const matchesFormat =
+      filters.format.length === 0 || filters.format.includes(c.format.toLowerCase());
+    const matchesRegion =
+      filters.region === '' || c.region.toLowerCase().includes(filters.region.toLowerCase());
+    const amount = parseFloat(c.amount);
+    const min = parseFloat(filters.amountMin);
+    const max = parseFloat(filters.amountMax);
+    const matchesAmount =
+      (!filters.amountMin || amount >= min) && (!filters.amountMax || amount <= max);
 
-  const rows: [string, (c: Competition) => React.ReactNode][] = [
-    ['Грантодатель', (c) => getGrantorName(c.grantorId)],
-    ['Формат', (c) => c.format],
-    ['Регион', (c) => c.region],
-    ['Сумма', (c) => c.amount],
-    ['Даты проведения', (c) => c.dates],
-    ['Описание', (c) => c.description],
-    ['Методология', (c) => c.methodology],
-  ]
+    return matchesSearch && matchesFormat && matchesRegion && matchesAmount;
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold mb-6">Сравнение конкурсов</h1>
+      <h1 className="text-2xl font-bold mb-6">Конкурсы</h1>
 
-      <p className="mb-4 text-gray-700">
-        Отметьте конкурсы, которые хотите сравнить:
-      </p>
-
-      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-        {competitions.map((c) => (
-          <label
-            key={c.id}
-            className="border rounded p-4 bg-white shadow hover:shadow-md transition cursor-pointer"
-          >
-            <input
-              type="checkbox"
-              checked={selectedIds.includes(c.id)}
-              onChange={() => toggleSelect(c.id)}
-              className="mr-2"
-            />
-            {c.title}
-          </label>
-        ))}
+      <div className="flex gap-4 mb-6 items-center">
+        <button
+          onClick={() => setFilterOpen(!filterOpen)}
+          className="px-3 py-1.5 border rounded text-sm hover:bg-gray-100"
+        >
+          Фильтр
+        </button>
+        <input
+          type="text"
+          placeholder="Начните писать название конкурса..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="px-4 py-2 border rounded w-full max-w-md"
+        />
       </div>
 
-      {selected.length >= 2 ? (
-        <div className="overflow-auto">
-          <table className="w-full border text-sm bg-white rounded shadow">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="border px-4 py-2 text-left">Критерий</th>
-                {selected.map((c) => (
-                  <th key={c.id} className="border px-4 py-2 text-left">
-                    {c.title}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map(([label, getValue]) => (
-                <tr key={label}>
-                  <td className="border px-4 py-2 font-medium">{label}</td>
-                  {selected.map((c) => (
-                    <td key={c.id + '_' + label} className="border px-4 py-2">
-                      {getValue(c)}
-                    </td>
-                  ))}
-                </tr>
+      {filterOpen && (
+        <div className="border rounded p-4 mb-6 space-y-4 bg-white shadow">
+          <div>
+            <p className="font-medium mb-2">Формат:</p>
+            <div className="flex gap-4">
+              {allFormats.map((f) => (
+                <label key={f} className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={filters.format.includes(f)}
+                    onChange={() => toggleFormat(f)}
+                  />
+                  {f}
+                </label>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Регион:</label>
+            <input
+              type="text"
+              value={filters.region}
+              onChange={(e) => setFilters({ ...filters, region: e.target.value })}
+              className="w-full border px-3 py-2 rounded"
+            />
+          </div>
+
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="block text-sm font-medium mb-1">Сумма от:</label>
+              <input
+                type="number"
+                value={filters.amountMin}
+                onChange={(e) => setFilters({ ...filters, amountMin: e.target.value })}
+                className="w-full border px-3 py-2 rounded"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium mb-1">Сумма до:</label>
+              <input
+                type="number"
+                value={filters.amountMax}
+                onChange={(e) => setFilters({ ...filters, amountMax: e.target.value })}
+                className="w-full border px-3 py-2 rounded"
+              />
+            </div>
+          </div>
         </div>
+      )}
+
+      {filtered.length === 0 ? (
+        <p className="text-gray-500">Нет конкурсов по заданным параметрам</p>
       ) : (
-        <p className="text-gray-500">
-          Выберите хотя бы два конкурса для сравнения.
-        </p>
+        <ul className="space-y-4">
+          {filtered.map((c) => (
+            <li key={c.id} className="bg-gray-100 rounded p-4">
+              <h3 className="text-lg font-bold mb-1">{c.title}</h3>
+              <div className="flex flex-wrap gap-4 text-xs text-gray-600">
+                <span>📅 {c.dates}</span>
+                <span>📍 {c.region}</span>
+              </div>
+              <Link
+                to={`/competitions/${c.id}`}
+                className="inline-block mt-2 text-sm text-blue-600 hover:underline"
+              >
+                Подробнее
+              </Link>
+            </li>
+
+          ))}
+        </ul>
       )}
     </div>
-  )
+  );
 }
