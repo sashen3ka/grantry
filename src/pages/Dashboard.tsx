@@ -5,21 +5,22 @@ import ResourcesTab from '../components/admin/ResourcesTab'
 import NewsTab from '../components/admin/NewsTab'
 
 const tabs = [
-  { id: 'competitions', label: 'Конкурсы' },
   { id: 'grantors', label: 'Грантодатели' },
+  { id: 'competitions', label: 'Конкурсы' },
   { id: 'resources', label: 'Ресурсы' },
   { id: 'news', label: 'Новости' },
-]
+];
+
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState('competitions')
+  const [activeTab, setActiveTab] = useState('grantors')
 
   const renderTab = () => {
     switch (activeTab) {
-      case 'competitions':
-        return <CompetitionsTab />
       case 'grantors':
         return <GrantorsTab />
+      case 'competitions':
+        return <CompetitionsTab />
       case 'resources':
         return <ResourcesTab />
       case 'news':

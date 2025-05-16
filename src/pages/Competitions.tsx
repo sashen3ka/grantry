@@ -9,31 +9,45 @@ interface Competition {
   description: string
   methodology: string
   amount: string
+  grantorId: number
+}
+
+interface Grantor {
+  id: number
+  name: string
 }
 
 export default function Competitions() {
   const [all, setAll] = useState<Competition[]>([])
+  const [grantors, setGrantors] = useState<Grantor[]>([])
   const [search, setSearch] = useState('')
   const [regionFilter, setRegionFilter] = useState('')
   const [formatFilter, setFormatFilter] = useState('')
 
-  // Загрузка данных
+  // Загрузка конкурсов и грантодателей
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem('competitions') || '[]')
+    const g = JSON.parse(localStorage.getItem('grantors') || '[]')
     setAll(stored)
+    setGrantors(g)
   }, [])
 
-  // Получаем уникальные регионы и форматы для селектов
+  // Уникальные значения для фильтров
   const regions = useMemo(
-    () => Array.from(new Set(all.map((c) => c.region))).filter((r) => r),
+    () => Array.from(new Set(all.map((c) => c.region))).filter(Boolean),
     [all]
   )
   const formats = useMemo(
-    () => Array.from(new Set(all.map((c) => c.format))).filter((f) => f),
+    () => Array.from(new Set(all.map((c) => c.format))).filter(Boolean),
     [all]
   )
 
-  // Фильтрация + поиск
+  // Получить имя грантодателя
+  const getGrantorName = (id: number) => {
+    return grantors.find((g) => g.id === id)?.name || 'Неизвестно'
+  }
+
+  // Фильтрация и поиск
   const filtered = useMemo(() => {
     return all.filter((c) => {
       const matchSearch =
@@ -95,8 +109,11 @@ export default function Competitions() {
               className="border rounded-lg shadow-sm p-6 bg-white hover:shadow-md transition"
             >
               <h2 className="text-xl font-semibold mb-2">{c.title}</h2>
-              <div className="text-sm text-gray-500 mb-4">
+              <div className="text-sm text-gray-500 mb-1">
                 📅 {c.dates} | 📍 {c.region} | 💰 {c.amount}
+              </div>
+              <div className="text-sm text-gray-500 mb-2">
+                🔹 Грантодатель: <span className="font-medium">{getGrantorName(c.grantorId)}</span>
               </div>
               <p className="text-gray-700 mb-4">{c.description}</p>
               <div className="flex gap-4">
@@ -105,7 +122,6 @@ export default function Competitions() {
                 </span>
                 <button
                   className="text-sm text-blue-600 hover:underline"
-                  // можно реализовать детализацию позже
                   onClick={() => {}}
                 >
                   Подробнее
