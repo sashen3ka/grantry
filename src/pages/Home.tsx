@@ -10,7 +10,7 @@ export default function Home() {
       </p>
       <Link
         to="/compare"
-        className="inline-block bg-sky-500 hover:bg-sky-600 text-white font-medium py-2 px-5 rounded text-sm transition"
+        className="inline-block bg-sky-800 hover:bg-sky-600 text-white font-medium py-2 px-5 rounded text-sm transition"
       >
         Все конкурсы
       </Link>

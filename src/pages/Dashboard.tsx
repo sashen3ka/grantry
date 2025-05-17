@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
-import CompetitionsTab from '../components/admin/CompetitionsTab'
-import GrantorsTab from '../components/admin/GrantorsTab'
-import ResourcesTab from '../components/admin/ResourcesTab'
-import NewsTab from '../components/admin/NewsTab'
+import React, { useState } from 'react';
+import GrantorsTab from '../components/admin/GrantorsTab';
+import CompetitionsTab from '../components/admin/CompetitionsTab';
+import ResourcesTab from '../components/admin/ResourcesTab';
+import NewsTab from '../components/admin/NewsTab';
 
 const tabs = [
   { id: 'grantors', label: 'Грантодатели' },
@@ -11,46 +11,43 @@ const tabs = [
   { id: 'news', label: 'Новости' },
 ];
 
-
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState('grantors')
+  const [tab, setTab] = useState(() => localStorage.getItem('dashboardTab') || 'grantors');
 
   const renderTab = () => {
-    switch (activeTab) {
-      case 'grantors':
-        return <GrantorsTab />
-      case 'competitions':
-        return <CompetitionsTab />
-      case 'resources':
-        return <ResourcesTab />
-      case 'news':
-        return <NewsTab />
-      default:
-        return null
+    switch (tab) {
+      case 'grantors': return <GrantorsTab />;
+      case 'competitions': return <CompetitionsTab />;
+      case 'resources': return <ResourcesTab />;
+      case 'news': return <NewsTab />;
+      default: return null;
     }
-  }
+  };
+
+  const handleTabChange = (id: string) => {
+    setTab(id);
+    localStorage.setItem('dashboardTab', id);
+  };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="max-w-7xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">Кабинет администратора</h1>
 
-      <div className="flex gap-4 border-b mb-6">
-        {tabs.map((tab) => (
+      <div className="flex gap-6 border-b mb-6">
+        {tabs.map((t) => (
           <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`py-2 px-4 border-b-2 transition ${
-              activeTab === tab.id
-                ? 'border-blue-600 text-blue-600 font-semibold'
-                : 'border-transparent text-gray-600 hover:text-blue-600'
+            key={t.id}
+            onClick={() => handleTabChange(t.id)}
+            className={`pb-2 text-sm border-b-2 transition-all ${
+              tab === t.id ? 'border-blue-600 text-blue-600 font-medium' : 'border-transparent text-gray-600'
             }`}
           >
-            {tab.label}
+            {t.label}
           </button>
         ))}
       </div>
 
       <div>{renderTab()}</div>
     </div>
-  )
+  );
 }

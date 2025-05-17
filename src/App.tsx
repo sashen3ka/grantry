@@ -9,7 +9,6 @@ import AdminLayout from './layouts/AdminLayout';
 import GrantorsList from './pages/GrantorsList';
 import Home from './pages/Home';
 import Catalog from './pages/Catalog';
-import Competitions from './pages/Competitions';
 import Compare from './pages/Compare';
 import Resources from './pages/Resources';
 import News from './pages/News';
@@ -30,7 +29,6 @@ function App() {
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/catalog" element={<Catalog />} />
-          <Route path="/competitions" element={<Competitions />} />
           <Route path="/compare" element={<Compare />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/news" element={<News />} />

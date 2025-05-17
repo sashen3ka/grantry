@@ -4,6 +4,9 @@ interface Grantor {
   id: number;
   name: string;
   description: string;
+  website?: string;
+  vk?: string;
+  telegram?: string;
 }
 
 interface Competition {
@@ -24,6 +27,9 @@ export default function GrantorsTab() {
     id: Date.now(),
     name: '',
     description: '',
+    website: '',
+    vk: '',
+    telegram: '',
   };
 
   const [form, setForm] = useState<Grantor>(emptyForm);
@@ -126,6 +132,9 @@ export default function GrantorsTab() {
                 {expandedId === g.id && (
                   <div className="text-sm text-gray-700 space-y-2">
                     <p><strong>Описание:</strong> {g.description}</p>
+                    <p><strong>Сайт:</strong> {g.website || '—'}</p>
+                    <p><strong>VK:</strong> {g.vk || '—'}</p>
+                    <p><strong>Telegram:</strong> {g.telegram || '—'}</p>
                     <div>
                       <h4 className="font-medium">Конкурсы:</h4>
                       <ul className="list-disc list-inside text-sm">
@@ -145,7 +154,6 @@ export default function GrantorsTab() {
         )}
       </div>
 
-      {/* Модалка */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-lg w-full shadow-xl relative">
@@ -173,6 +181,36 @@ export default function GrantorsTab() {
                   className="w-full border px-3 py-2 rounded"
                 />
                 {errors.description && <p className="text-sm text-red-600 mt-1">{errors.description}</p>}
+              </div>
+              <div>
+                <input
+                  type="text"
+                  name="website"
+                  value={form.website}
+                  onChange={(e) => setForm({ ...form, website: e.target.value })}
+                  placeholder="Сайт (https://...)"
+                  className="w-full border px-3 py-2 rounded"
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  name="vk"
+                  value={form.vk}
+                  onChange={(e) => setForm({ ...form, vk: e.target.value })}
+                  placeholder="Ссылка на VK"
+                  className="w-full border px-3 py-2 rounded"
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  name="telegram"
+                  value={form.telegram}
+                  onChange={(e) => setForm({ ...form, telegram: e.target.value })}
+                  placeholder="Ссылка на Telegram"
+                  className="w-full border px-3 py-2 rounded"
+                />
               </div>
               <div className="flex gap-3 justify-end">
                 <button
