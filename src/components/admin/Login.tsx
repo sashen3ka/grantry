@@ -3,20 +3,21 @@ import { useNavigate } from 'react-router-dom'
 
 export default function Login() {
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!email || !password) {
-      alert('Введите email и пароль')
-      return
-    }
+    const validUsername = 'admin'
+    const validPassword = 'admin123!'
 
-    // Роль теперь всегда admin
-    localStorage.setItem('user', JSON.stringify({ email, role: 'admin' }))
-    navigate('/dashboard')
+    if (username === validUsername && password === validPassword) {
+      localStorage.setItem('user', JSON.stringify({ username, role: 'admin' }))
+      navigate('/dashboard')
+    } else {
+      alert('Неверный логин или пароль')
+    }
   }
 
   return (
@@ -25,11 +26,11 @@ export default function Login() {
 
       <form onSubmit={handleLogin} className="space-y-4">
         <input
-          type="email"
-          placeholder="Email"
+          type="text"
+          placeholder="Логин"
           className="w-full px-4 py-2 border rounded"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
         />
         <input
           type="password"
