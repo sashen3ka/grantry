@@ -64,7 +64,7 @@ export default function Compare() {
   });
 
 
-return (
+  return (
     <div className="max-w-7xl mx-auto px-4 py-6">
       <h1 className="text-3xl font-bold mb-6">Грантовые конкурсы</h1>
 
@@ -162,25 +162,26 @@ return (
             >
               <h3 className="text-lg font-bold mb-1">{c.title}</h3>
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-gray-600 mb-2">
-  <span className="flex items-center gap-1">
-    <Calendar className="w-4 h-4" />
-    {new Date(c.dates).toLocaleDateString('ru-RU')}
-  </span>
-  <span className="flex items-center gap-1">
-    <MapPin className="w-4 h-4" />
-    {c.region}
-  </span>
-  <span className="flex items-center gap-1">
-    <Coins className="w-4 h-4" />
-    {c.amount}
-  </span>
-</div>
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-4 h-4" />
+                  {new Date(c.dates).toLocaleDateString('ru-RU')}
+                </span>
+                <span className="flex items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  {c.region}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Coins className="w-4 h-4" />
+                  {c.amount}
+                </span>
+              </div>
               <Link
                 to={`/competitions/${c.id}`}
-                className="inline-block text-sm text-blue-600 hover:underline"
+                className="inline-block mt-2 bg-sky-800 hover:bg-sky-600 text-white font-medium py-2 px-5 rounded text-sm transition"
               >
                 Подробнее
               </Link>
+
             </li>
           ))}
         </ul>
