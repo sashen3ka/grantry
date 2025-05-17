@@ -1,7 +1,7 @@
 // Обновлённая страница Compare.tsx с адаптацией под мобильные
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, MapPin, Coins } from 'lucide-react';
+import { Calendar, MapPin, Coins, Users } from 'lucide-react';
 
 
 interface Competition {
@@ -160,19 +160,23 @@ export default function Compare() {
               key={c.id}
               className="bg-gray-50 border border-gray-200 rounded-xl p-4 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
             >
-              <h3 className="text-lg font-bold mb-1">{c.title}</h3>
+              <h3 className="text-lg font-bold mb-1">{c.title || 'Без названия'}</h3>
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-gray-600 mb-2">
                 <span className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
-                  {new Date(c.dates).toLocaleDateString('ru-RU')}
+                  {c.dates ? new Date(c.dates).toLocaleDateString('ru-RU') : '—'}
                 </span>
                 <span className="flex items-center gap-1">
                   <MapPin className="w-4 h-4" />
-                  {c.region}
+                  {c.region || '—'}
                 </span>
                 <span className="flex items-center gap-1">
                   <Coins className="w-4 h-4" />
-                  {c.amount}
+                  {c.amount || '—'}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Users className="w-4 h-4" />
+                  {Array.isArray(c.types) && c.types.length > 0 ? c.types.join(', ') : '—'}
                 </span>
               </div>
               <Link
@@ -181,7 +185,6 @@ export default function Compare() {
               >
                 Подробнее
               </Link>
-
             </li>
           ))}
         </ul>

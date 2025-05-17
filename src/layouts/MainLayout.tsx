@@ -5,7 +5,7 @@ import Header from '../components/Header';
 export default function MainLayout() {
   return (
     <div
-      className="min-h-screen bg-cover bg-no-repeat bg-top"
+      className="min-h-screen bg-no-repeat bg-right bg-contain sm:bg-cover sm:bg-top"
       style={{ backgroundImage: "url('/images/bg.png')" }}
     >
       <Header />

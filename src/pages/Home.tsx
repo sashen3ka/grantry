@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 
 export default function Home() {
   return (
-    <div className="max-w-7xl mx-auto px-4 py-20 sm:py-28">
+    <div className="max-w-7xl mx-auto px-6 sm:px-4 py-20 sm:py-28 text-center sm:text-left">
+
       <h1 className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900">Главная страница</h1>
       <p className="text-base sm:text-lg text-gray-800 mb-6 max-w-xl">
         Портал для поиска и сравнения актуальных конкурсов для НКО, ИП и юрлиц
