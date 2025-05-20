@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 
 export default function Catalog() {
   const [allGrantors, setAllGrantors] = useState(staticGrantors);
-  const [expandedId, setExpandedId] = useState<number | null>(null);
   const [search, setSearch] = useState('');
 
   useEffect(() => {
@@ -13,7 +12,15 @@ export default function Catalog() {
       try {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
-          setAllGrantors([...staticGrantors, ...parsed]);
+          // Объединяем статические и пользовательские
+          const merged = [...staticGrantors, ...parsed];
+
+          // Оставляем только первый объект с каждым id
+          const unique = merged.filter(
+            (g, index, arr) => arr.findIndex(item => item.id === g.id) === index
+          );
+
+          setAllGrantors(unique);
         }
       } catch (err) {
         console.error('Ошибка парсинга grantors из localStorage', err);
@@ -21,13 +28,14 @@ export default function Catalog() {
     }
   }, []);
 
+
   const filtered = allGrantors.filter((g) =>
     g.name.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
-      <h1 className="text-3xl font-bold mb-6">Каталог грантодателей</h1>
+      <h1 className="text-2xl font-bold mb-4">Каталог грантодателей</h1>
 
       <div className="mb-6">
         <input
@@ -44,7 +52,11 @@ export default function Catalog() {
       ) : (
         <div className="space-y-4">
           {filtered.map((g) => (
-            <div key={g.id} className="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:shadow-sm transition">
+            <div
+              key={g.id}
+              className="border rounded-xl p-4 flex flex-col justify-between transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-md"
+            >
+
               <div className="flex justify-between items-center">
                 <Link
                   to={`/grantors/${g.id}`}
@@ -52,18 +64,13 @@ export default function Catalog() {
                 >
                   {g.name}
                 </Link>
-                <button
-                  onClick={() => setExpandedId(expandedId === g.id ? null : g.id)}
+                <Link
+                  to={`/grantors/${g.id}`}
                   className="bg-sky-800 hover:bg-sky-600 text-white font-medium py-2 px-5 rounded text-sm transition"
                 >
-                  {expandedId === g.id ? 'Скрыть' : 'Подробнее'}
-                </button>
+                  Подробнее
+                </Link>
               </div>
-              {expandedId === g.id && (
-                <div className="mt-2 text-sm text-gray-700">
-                  <p>{g.description}</p>
-                </div>
-              )}
             </div>
           ))}
         </div>

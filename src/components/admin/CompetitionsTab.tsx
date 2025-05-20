@@ -1,5 +1,5 @@
-// ✅ CompetitionsTab.tsx с типами для конкурсов
 import React, { useEffect, useState } from 'react';
+
 
 interface Competition {
   id: number;
@@ -29,7 +29,6 @@ export default function CompetitionsTab() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const allTypes = ['Физические лица', 'Юридические лица', 'НКО', 'ИП', 'Субсидии'];
-
   const emptyForm: Competition = {
     id: Date.now(),
     title: '',
@@ -42,15 +41,24 @@ export default function CompetitionsTab() {
     grantorId: 0,
     types: [],
   };
-
   const [form, setForm] = useState<Competition>(emptyForm);
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem('competitions') || '[]');
-    const g = JSON.parse(localStorage.getItem('grantors') || '[]');
-    setCompetitions(stored);
-    setGrantors(g);
+    const stored = localStorage.getItem('grantors');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          setGrantors(parsed);
+        }
+      } catch (err) {
+        console.error('Ошибка при чтении грантодателей из localStorage', err);
+      }
+    }
   }, []);
+
+
+
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -71,10 +79,12 @@ export default function CompetitionsTab() {
 
   const handleSave = () => {
     if (!validate()) return;
-    const isEdit = competitions.some((c) => c.id === form.id);
+
+    const isEdit = competitions.some(c => c.id === form.id);
     const updated = isEdit
-      ? competitions.map((c) => (c.id === form.id ? form : c))
+      ? competitions.map(c => c.id === form.id ? form : c)
       : [...competitions, { ...form, id: Date.now() }];
+
     localStorage.setItem('competitions', JSON.stringify(updated));
     setCompetitions(updated);
     setShowModal(false);
@@ -82,6 +92,7 @@ export default function CompetitionsTab() {
     setForm(emptyForm);
     setErrors({});
   };
+
 
   const handleDelete = (id: number) => {
     if (!confirm('Удалить конкурс?')) return;

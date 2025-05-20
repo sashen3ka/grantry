@@ -6,7 +6,6 @@ import MainLayout from './layouts/MainLayout';
 import AdminLayout from './layouts/AdminLayout';
 
 // Public pages
-import GrantorsList from './pages/GrantorsList';
 import Home from './pages/Home';
 import Catalog from './pages/Catalog';
 import Compare from './pages/Compare';
@@ -33,7 +32,6 @@ function App() {
           <Route path="/resources" element={<Resources />} />
           <Route path="/news" element={<News />} />
           <Route path="/grantors/:id" element={<GrantorProfile />} />
-          <Route path="/grantors" element={<GrantorsList />} />
           <Route path="/competitions/:id" element={<CompetitionProfile />} />
 
 

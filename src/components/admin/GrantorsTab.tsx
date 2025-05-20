@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
+
 interface Grantor {
   id: number;
   name: string;
@@ -35,11 +36,18 @@ export default function GrantorsTab() {
   const [form, setForm] = useState<Grantor>(emptyForm);
 
   useEffect(() => {
-    const storedGrantors = JSON.parse(localStorage.getItem('grantors') || '[]');
-    const storedCompetitions = JSON.parse(localStorage.getItem('competitions') || '[]');
-    setGrantors(storedGrantors);
-    setCompetitions(storedCompetitions);
+    // Читаем из localStorage
+    const storedRaw = localStorage.getItem('grantors');
+    const stored: Grantor[] = storedRaw ? JSON.parse(storedRaw) : [];
+
+    // Оставляем только первые вхождения по каждому id
+    const uniqueGrantors = stored.filter((g, i, arr) =>
+      arr.findIndex(x => x.id === g.id) === i
+    );
+
+    setGrantors(uniqueGrantors);
   }, []);
+
 
   const validate = () => {
     const newErrors: Record<string, string> = {};

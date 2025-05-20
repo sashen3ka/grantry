@@ -1,10 +1,13 @@
+// CompetitionProfile.tsx
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, Coins, Users } from 'lucide-react';
+import { grantors as staticGrantors } from '../data/grantors';
 
 interface Competition {
     id: number;
-    title: string;
+    name?: string;
+    title?: string;
     dates: string;
     format: string;
     region: string;
@@ -15,84 +18,90 @@ interface Competition {
     types: string[];
 }
 
-interface Grantor {
-    id: number;
-    name: string;
-}
-
 export default function CompetitionProfile() {
-    const { id } = useParams();
-    const competitionId = Number(id);
-
+    const { id } = useParams<{ id: string }>();
     const [competition, setCompetition] = useState<Competition | null>(null);
-    const [grantor, setGrantor] = useState<Grantor | null>(null);
+    const [grantor, setGrantor] = useState<{ id: number; name: string } | null>(null);
+    const navigate = useNavigate();
+
 
     useEffect(() => {
-        const competitions: Competition[] = JSON.parse(localStorage.getItem('competitions') || '[]');
-        const grantors: Grantor[] = JSON.parse(localStorage.getItem('grantors') || '[]');
+        import('../data/competitions').then((mod) => {
+            const fileData = mod.competitions;
+            const localData = JSON.parse(localStorage.getItem('competitions') || '[]');
+            const all = [...fileData, ...localData];
+            const found = all.find((c) => c.id === Number(id));
+            setCompetition(found || null);
 
-        const found = competitions.find((c) => c.id === competitionId);
-        setCompetition(found || null);
+            // загружаем и статичных, и локальных грантодателей
+            import('../data/grantors').then((gm) => {
+                const stored = JSON.parse(localStorage.getItem('grantors') || '[]');
+                const allGrantors = [...gm.grantors, ...stored];
+                const related = allGrantors.find((g) => g.id === found?.grantorId);
+                setGrantor(related || null);
+            });
+        });
+    }, [id]);
 
-        if (found) {
-            const g = grantors.find((g) => g.id === found.grantorId);
-            setGrantor(g || null);
-        }
-    }, [competitionId]);
 
     if (!competition) {
-        return <div className="p-6">Конкурс не найден</div>;
+        return <div className="text-center py-10 text-gray-500">Конкурс не найден</div>;
     }
 
+    const competitionName = competition.name || competition.title || 'Без названия';
+
     return (
-        <div className="max-w-7xl mx-auto px-4 pt-6 pb-20 space-y-6">
-            <h1 className="text-3xl font-bold text-gray-900">{competition.title}</h1>
 
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 space-y-4 max-w-3xl">
-                <p className="text-sm text-gray-700">
-                    <strong>Грантодатель:</strong>{' '}
-                    {grantor ? (
-                        <Link to={`/grantors/${grantor.id}`} className="text-blue-600 hover:underline">
-                            {grantor.name}
-                        </Link>
-                    ) : (
-                        <span className="text-gray-500 italic">Грантодатель не найден (возможно, удалён)</span>
-                    )}
-                </p>
-
-
-                <div className="flex flex-col gap-2 text-sm text-gray-700">
-                    <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-gray-500" />
-                        <span><strong>Дата проведения:</strong> {new Date(competition.dates).toLocaleDateString('ru-RU')}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-gray-500" />
-                        <span><strong>Регион:</strong> {competition.region}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Coins className="w-4 h-4 text-gray-500" />
-                        <span><strong>Сумма:</strong> {competition.amount}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 text-gray-500" />
-                        <span><strong>Типы участников:</strong> {Array.isArray(competition.types) && competition.types.length > 0 ? competition.types.join(', ') : '—'}</span>
-                    </div>
-                </div>
-
-                <div className="text-sm text-gray-700 space-y-2 pt-4">
-                    <p><strong>Формат:</strong> {competition.format}</p>
-                    <p><strong>Описание:</strong> {competition.description}</p>
-                    <p><strong>Методология:</strong> {competition.methodology}</p>
-                </div>
+        <div className="px-4 py-6 max-w-3xl mx-auto">
+            <div className="relative mb-4 h-10">
+                <button
+                    onClick={() => navigate(-1)}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 text-sm text-blue-600 hover:underline"
+                >
+                    ← Назад
+                </button>
+                <h1 className="text-2xl font-bold text-center">{competitionName}</h1>
             </div>
 
-            <Link
-                to="/compare"
-                className="inline-block mt-4 text-sm text-blue-600 hover:underline"
-            >
-                ← Назад к списку конкурсов
-            </Link>
+
+            <div className="border rounded-xl p-4 flex flex-col justify-between transition duration-300 ease-in-out transform hover:shadow-md space-y-4">
+
+                <div className="space-y-3 text-gray-700">
+                    <div className="flex items-center gap-2">
+                        <Calendar size={18} /> Дата: {competition.dates || '—'}
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <MapPin size={18} /> Регион: {competition.region}
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Coins size={18} /> Сумма: {competition.amount} ₽
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Users size={18} /> Типы: {competition.types.join(', ')}
+                    </div>
+                    <div>
+                        <h2 className="font-semibold mt-4 mb-1">Описание</h2>
+                        <p>{competition.description}</p>
+                    </div>
+                    <div>
+                        <h2 className="font-semibold mt-4 mb-1">Методология</h2>
+                        <p>{competition.methodology}</p>
+                    </div>
+                </div>
+
+                {grantor && (
+                    <div className="flex items-center gap-2 mt-8">
+                        <span className="text-lg font-semibold">Грантодатель:</span>
+                        <Link
+                            to={`/grantors/${grantor.id}`}
+                            className="text-lg font-semibold hover:underline"
+                        >
+                            {grantor.name}
+                        </Link>
+                    </div>
+                )}
+
+            </div>
         </div>
     );
 }

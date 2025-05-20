@@ -3,10 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, MapPin, Coins, Users } from 'lucide-react';
 
-
 interface Competition {
   id: number;
-  title: string;
+  name?: string;
+  title?: string;
   dates: string;
   format: string;
   region: string;
@@ -30,11 +30,15 @@ export default function Compare() {
   });
 
   const allFormats = ['онлайн', 'офлайн', 'гибридный'];
-  const allTypes = ['НКО', 'ИП', 'Юридические лица'];
+  const allTypes = ['НКО', 'ИП', 'Юридические лица', 'Субсидии', 'Физические лица'];
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem('competitions') || '[]');
-    setCompetitions(stored);
+    import('../data/competitions').then((mod) => {
+      const fileData = mod.competitions;
+      const stored = localStorage.getItem('competitions');
+      const localData = stored ? JSON.parse(stored) : [];
+      setCompetitions([...fileData, ...localData]);
+    });
   }, []);
 
   const toggleArrayFilter = (field: 'format' | 'types', value: string) => {
@@ -47,148 +51,153 @@ export default function Compare() {
   };
 
   const filtered = competitions.filter((c) => {
-    const matchesSearch = c.title.toLowerCase().includes(search.toLowerCase());
+    const competitionName = c.name || c.title || '';
+    const matchesSearch = competitionName.toLowerCase().includes(search.toLowerCase());
     const matchesFormat =
-      filters.format.length === 0 || filters.format.includes(c.format.toLowerCase());
+      filters.format.length === 0 ||
+      filters.format.includes(c.format.toLowerCase());
     const matchesRegion =
-      filters.region === '' || c.region.toLowerCase().includes(filters.region.toLowerCase());
-    const amount = parseFloat(c.amount);
-    const min = parseFloat(filters.amountMin);
-    const max = parseFloat(filters.amountMax);
-    const matchesAmount =
-      (!filters.amountMin || amount >= min) && (!filters.amountMax || amount <= max);
+      !filters.region || c.region.toLowerCase().includes(filters.region.toLowerCase());
+    const matchesAmount = (!filters.amountMin || +c.amount >= +filters.amountMin) &&
+      (!filters.amountMax || +c.amount <= +filters.amountMax);
     const matchesTypes =
-      filters.types.length === 0 || filters.types.some((t) => c.types?.includes(t));
+      filters.types.length === 0 ||
+      filters.types.some((type) => c.types.includes(type));
 
-    return matchesSearch && matchesFormat && matchesRegion && matchesAmount && matchesTypes;
+    return (
+      matchesSearch && matchesFormat && matchesRegion && matchesAmount && matchesTypes
+    );
   });
 
-
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6">
-      <h1 className="text-3xl font-bold mb-6">Грантовые конкурсы</h1>
+    <div className="px-4 py-6 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4 text-center">Грантовые конкурсы</h1>
 
-      <div className="flex flex-col sm:flex-row gap-4 mb-6 items-start sm:items-center">
+      <div className="flex flex-col sm:flex-row items-center gap-2 mb-4">
         <button
           onClick={() => setFilterOpen(!filterOpen)}
-          className="px-4 py-2 border rounded text-sm hover:bg-gray-100"
+          className="bg-sky-800 hover:bg-sky-600 text-white font-medium py-2 px-5 rounded text-sm transition"
         >
-          {filterOpen ? 'Скрыть фильтры' : 'Показать фильтры'}
+          {filterOpen ? 'Фильтры' : 'Фильтры'}
         </button>
         <input
           type="text"
           placeholder="Начните писать название конкурса..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="px-4 py-2 border rounded w-full max-w-md"
+          className="border px-5 py-2 rounded transition h-[40px] w-full sm:w-[720px] md:w-[768px]"
+
         />
       </div>
 
       {filterOpen && (
-        <div className="bg-gray-50 border border-gray-200 rounded-xl px-6 py-5 mb-6 space-y-6 max-w-3xl mx-auto">
+        <div className="border rounded p-4 mb-4 space-y-3 bg-gray-50">
           <div>
-            <p className="font-medium mb-2">Формат:</p>
-            <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-              {allFormats.map((f) => (
-                <label key={f} className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={filters.format.includes(f)}
-                    onChange={() => toggleArrayFilter('format', f)}
-                  />
-                  {f}
-                </label>
+            <label className="font-semibold">Формат:</label>
+            <div className="flex flex-wrap gap-2 mt-1">
+              {allFormats.map((format) => (
+                <button
+                  key={format}
+                  className={`px-3 py-1 border rounded text-sm font-medium transition ${filters.format.includes(format)
+                    ? 'bg-sky-800 text-white'
+                    : 'bg-white text-gray-800 hover:bg-sky-100'
+                    }`}
+                  onClick={() => toggleArrayFilter('format', format)}
+                >
+                  {format}
+
+                </button>
               ))}
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Регион:</label>
+            <label className="font-semibold">Типы участников:</label>
+            <div className="flex flex-wrap gap-2 mt-1">
+              {allTypes.map((type) => (
+                <button
+                  key={type}
+                  className={`px-3 py-1 border rounded text-sm font-medium transition ${filters.types.includes(type)
+                    ? 'bg-sky-800 text-white'
+                    : 'bg-white text-gray-800 hover:bg-sky-100'
+                    }`}
+                  onClick={() => toggleArrayFilter('types', type)}
+                >
+                  {type}
+
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="font-semibold">Регион:</label>
             <input
               type="text"
               value={filters.region}
               onChange={(e) => setFilters({ ...filters, region: e.target.value })}
-              className="w-full border px-3 py-2 rounded"
+              className="border px-3 py-2 rounded w-full"
             />
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex gap-4">
             <div className="flex-1">
-              <label className="block text-sm font-medium mb-1">Сумма от:</label>
+              <label className="font-semibold">Мин. сумма:</label>
               <input
                 type="number"
                 value={filters.amountMin}
                 onChange={(e) => setFilters({ ...filters, amountMin: e.target.value })}
-                className="w-full border px-3 py-1.5 rounded"
+                className="border px-3 py-2 rounded w-full"
               />
             </div>
             <div className="flex-1">
-              <label className="block text-sm font-medium mb-1">Сумма до:</label>
+              <label className="font-semibold">Макс. сумма:</label>
               <input
                 type="number"
                 value={filters.amountMax}
                 onChange={(e) => setFilters({ ...filters, amountMax: e.target.value })}
-                className="w-full border px-3 py-1.5 rounded"
+                className="border px-3 py-2 rounded w-full"
               />
-            </div>
-          </div>
-
-          <div>
-            <p className="font-medium mb-2">Типы участников:</p>
-            <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-              {allTypes.map((t) => (
-                <label key={t} className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={filters.types.includes(t)}
-                    onChange={() => toggleArrayFilter('types', t)}
-                  />
-                  {t}
-                </label>
-              ))}
             </div>
           </div>
         </div>
       )}
 
-      {filtered.length === 0 ? (
-        <p className="text-gray-500">Нет конкурсов по заданным параметрам</p>
-      ) : (
-        <ul className="space-y-4">
-          {filtered.map((c) => (
-            <li
-              key={c.id}
-              className="bg-gray-50 border border-gray-200 rounded-xl p-4 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
-            >
-              <h3 className="text-lg font-bold mb-1">{c.title || 'Без названия'}</h3>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-gray-600 mb-2">
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  {c.dates ? new Date(c.dates).toLocaleDateString('ru-RU') : '—'}
-                </span>
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-4 h-4" />
-                  {c.region || '—'}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Coins className="w-4 h-4" />
-                  {c.amount || '—'}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Users className="w-4 h-4" />
-                  {Array.isArray(c.types) && c.types.length > 0 ? c.types.join(', ') : '—'}
-                </span>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {filtered.map((c) => {
+          const competitionName = c.name || c.title || 'Без названия';
+          return (
+            <div key={c.id} className="border rounded-xl p-4 flex flex-col justify-between transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-md">
+              <div className="flex-1">
+                <h2 className="text-lg font-semibold mb-2">{competitionName}</h2>
+                <div className="space-y-2 text-sm text-gray-700 mb-4">
+                  <div className="flex items-center gap-2">
+                    <Calendar size={16} /> <span>{c.dates || '—'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MapPin size={16} /> <span>{c.region}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Coins size={16} /> <span>{c.amount}</span>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Users size={16} /> <span>{c.types.join(', ')}</span>
+                  </div>
+                </div>
               </div>
-              <Link
-                to={`/competitions/${c.id}`}
-                className="inline-block mt-2 bg-sky-800 hover:bg-sky-600 text-white font-medium py-2 px-5 rounded text-sm transition"
-              >
-                Подробнее
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
+              <div className="flex justify-end">
+                <Link
+                  to={`/competitions/${c.id}`}
+                  className="bg-sky-800 hover:bg-sky-600 text-white font-medium py-2 px-5 rounded text-sm transition"
+                >
+                  Подробнее
+                </Link>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
     </div>
   );
 }
