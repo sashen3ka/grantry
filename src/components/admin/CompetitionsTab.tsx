@@ -44,15 +44,23 @@ export default function CompetitionsTab() {
   const [form, setForm] = useState<Competition>(emptyForm);
 
   useEffect(() => {
-    const stored = localStorage.getItem('grantors');
-    if (stored) {
+    const storedGrantors = localStorage.getItem('grantors');
+    if (storedGrantors) {
       try {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          setGrantors(parsed);
-        }
+        const parsed = JSON.parse(storedGrantors);
+        if (Array.isArray(parsed)) setGrantors(parsed);
       } catch (err) {
         console.error('Ошибка при чтении грантодателей из localStorage', err);
+      }
+    }
+
+    const storedCompetitions = localStorage.getItem('competitions');
+    if (storedCompetitions) {
+      try {
+        const parsed = JSON.parse(storedCompetitions);
+        if (Array.isArray(parsed)) setCompetitions(parsed);
+      } catch (err) {
+        console.error('Ошибка при чтении конкурсов из localStorage', err);
       }
     }
   }, []);
